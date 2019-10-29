@@ -1,0 +1,20 @@
+---
+title: "20-explore"
+output: html_notebook
+---
+
+## Basic exploration
+
+We will not be performing exploratory data analysis due to time constraints
+
+```{r}
+attrition %>%
+  mutate(annual_salary = 2080 * hourly_rate,
+         replace_cost = if_else(attrition == "Yes", replace_multiplier * annual_salary, 0)) %>%
+  summarize(total_cost = sum(replace_cost))
+```
+```{r}
+attrition %>%
+  tabyl(attrition)
+```
+

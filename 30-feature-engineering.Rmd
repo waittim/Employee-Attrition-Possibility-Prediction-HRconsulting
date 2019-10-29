@@ -1,0 +1,92 @@
+---
+title: "30-feature-engineering"
+output: html_notebook
+---
+
+# Predictive Features
+
+## Standardize relative to department
+
+Standardize measures relative to an employee's department. Why might this be informative? Imagine it's been five years since an employee was promoted. Is this bad? If the average time since promotion for her department is three years, yes it is. If the average time is eight years, it is not bad. Standardizing by department rescales a number relative to an employee's department, where 0 indicates the employee's years since promotion was average for the department, 1 indicates it is one standard deviation above, -1 indicates it is one standard deviation below. 
+
+### Monthly income relative to department
+```{r}
+monthly_income_rel_department <- function(df) {
+  df %>%
+    group_by(department) %>%
+    mutate(monthly_income_rel_department = scale(monthly_income)) %>%
+    ungroup()
+} 
+```
+
+### Years since last promotion relative to department
+```{r}
+years_since_last_promotion_rel_department <- function(df) {
+  df %>%
+    group_by(department) %>%
+    mutate(years_since_last_promotion_rel_department = scale(years_since_last_promotion)) %>%
+    ungroup()
+} 
+```
+
+### Percent salary hike relative to department
+```{r}
+percent_salary_hike_rel_department <- function(df) {
+  df %>%
+    group_by(department) %>%
+    mutate(percent_salary_hike_rel_department = scale(percent_salary_hike)) %>%
+    ungroup()
+} 
+```
+
+### Years in current role relative to department
+```{r}
+years_in_current_role_rel_department <- function(df) {
+  df %>%
+    group_by(department) %>%
+    mutate(years_in_current_role_rel_department = scale(years_in_current_role)) %>%
+    ungroup()
+} 
+```
+
+
+### Job satisfaction relative to department
+```{r}
+job_satisfaction_rel_department <- function(df) {
+  df %>%
+    group_by(department) %>%
+    mutate(job_satisfaction_rel_department = scale(job_satisfaction)) %>%
+    ungroup()
+} 
+```
+
+### Training times last year relative to department
+```{r}
+training_times_rel_department <- function(df) {
+  df %>%
+    group_by(department) %>%
+    mutate(training_times_rel_department = scale(training_times_last_year)) %>%
+    ungroup()
+} 
+```
+
+### Education
+```{r}
+education_rel_department <- function(df){
+  df %>%
+    group_by(department) %>%
+    mutate(education_rel_department = scale(education)) %>%
+    ungroup()
+}
+```
+
+## Salary Hike
+The dollar value of a salary hike may have more meaning to an employee than a percentage.
+
+```{r}
+salary_hike <- function(df) {
+  df %>%
+    mutate(salary_hike = 2080 * hourly_rate * percent_salary_hike/100)
+}
+```
+

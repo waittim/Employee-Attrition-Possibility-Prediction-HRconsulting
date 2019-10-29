@@ -1,0 +1,103 @@
+---
+title: "10-import-hr-data"
+output: html_notebook
+---
+
+# HR Data
+
+IBM.HR Data-Employee-Attrition.xlsx is simulated data created by IBM to highlight the capabilities of their automated ML solutions. It is similar to HR retention data used by companies to analyze attrition (employees leaving the company). See https://www.kaggle.com/pavansubhasht/ibm-hr-analytics-attrition-dataset for full information.  
+
+## Libraries
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(h2o)
+library(readxl)
+library(glue)
+library(lemon)
+knit_print.data.frame <- lemon_print
+library(knitr)
+library(h2o)
+h2o.init(nthreads = -1, #Number of threads -1 means use all cores on your machine
+         max_mem_size = "8G")  #max mem size is the maximum memory to allocate to H2O
+```
+Open a browser to http://localhost:54321 to interact directly with H2O.
+
+
+
+## Cost Data
+
+In order to calculate the value of the model, we need to estimate the cost of retention, the cost of losing an employee, the probability of retention due to an intervention in the event attrition is predicted. 
+
+```{r}
+replace_multiplier <- 1.5 # Cost in multiple of annual salary to replace an employee
+intervention_cost <- 1000  # Cost in dollars per person for retention program
+success_rate <- .50       # Estimate success rate of retention program
+```
+
+
+
+
+## Read data
+
+```{r}
+attrition <- read_excel("data/IBM.HR Data-Employee-Attrition.xlsx", 
+    col_types = c("numeric", "text", "text", 
+        "numeric", "text", "numeric", "numeric", 
+        "text", "numeric", "text", "numeric", 
+        "text", "numeric", "numeric", "numeric", 
+        "text", "numeric", "text", "numeric", 
+        "numeric", "numeric", "text", "text", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric")) %>%
+  clean_names() %>%
+  select(attrition, everything(), -employee_number, -employee_count, -over18, -standard_hours) # Move target to front, remove unneeded
+```
+
+## Attrition Data Description
+
+
+Name	Description
+AGE	Numerical Value
+ATTRITION	Employee leaving the company (0=no, 1=yes)
+BUSINESS TRAVEL	(1=No Travel, 2=Travel Frequently, 3=Tavel Rarely)
+DAILY RATE	Numerical Value - Salary Level
+DEPARTMENT	(1=HR, 2=R&D, 3=Sales)
+DISTANCE FROM HOME	Numerical Value - THE DISTANCE FROM WORK TO HOME
+EDUCATION	Numerical Value
+EDUCATION FIELD	(1=HR, 2=LIFE SCIENCES, 3=MARKETING, 4=MEDICAL SCIENCES, 5=OTHERS, 6= TEHCNICAL)
+EMPLOYEE COUNT	Numerical Value
+EMPLOYEE NUMBER	Numerical Value - EMPLOYEE ID
+ENVIROMENT SATISFACTION	Numerical Value - SATISFACTION WITH THE ENVIROMENT
+GENDER	(1=FEMALE, 2=MALE)
+HOURLY RATE	Numerical Value - HOURLY SALARY
+JOB INVOLVEMENT	Numerical Value - JOB INVOLVEMENT
+JOB LEVEL	Numerical Value - LEVEL OF JOB
+JOB ROLE	(1=HC REP, 2=HR, 3=LAB TECHNICIAN, 4=MANAGER, 5= MANAGING DIRECTOR, 6= REASEARCH DIRECTOR, 7= RESEARCH SCIENTIST, 8=SALES EXECUTIEVE, 9= SALES REPRESENTATIVE)
+JOB SATISFACTION	Numerical Value - SATISFACTION WITH THE JOB
+MARITAL STATUS	(1=DIVORCED, 2=MARRIED, 3=SINGLE)
+MONTHLY INCOME	Numerical Value - MONTHLY SALARY
+MONTHY RATE	Numerical Value - MONTHY RATE
+NUMCOMPANIES WORKED	Numerical Value - NO. OF COMPANIES WORKED AT
+OVER 18	(1=YES, 2=NO)
+OVERTIME	(1=NO, 2=YES)
+PERCENT SALARY HIKE	Numerical Value - PERCENTAGE INCREASE IN SALARY.
+The parentage of change in salary between 2 year (2017, 2018).
+PERFORMANCE RATING	Numerical Value - ERFORMANCE RATING
+RELATIONS SATISFACTION	Numerical Value - RELATIONS SATISFACTION
+STANDARD HOURS	Numerical Value - STANDARD HOURS
+STOCK OPTIONS LEVEL	Numerical Value - STOCK OPTIONS.
+How much company stocks you own from this company
+TOTAL WORKING YEARS	Numerical Value - TOTAL YEARS WORKED
+TRAINING TIMES LAST YEAR	Numerical Value - HOURS SPENT TRAINING
+WORK LIFE BALANCE	Numerical Value - TIME SPENT BEWTWEEN WORK AND OUTSIDE
+YEARS AT COMPANY	Numerical Value - TOTAL NUMBER OF YEARS AT THE COMPNAY
+YEARS IN CURRENT ROLE	Numerical Value -YEARS IN CURRENT ROLE
+YEARS SINCE LAST PROMOTION	Numerical Value - LAST PROMOTION
+YEARS WITH CURRENT MANAGER	Numerical Value - YEARS SPENT WITH CURRENT MANAGER
+
+
+
